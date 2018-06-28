@@ -18,6 +18,7 @@ import com.yanzhenjie.permission.AndPermission;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private Button Qrcode;
     private Button ImgQrcode;
+    private Button CreateQrcode;
     private static final int REQUEST_CODE = 959;
     private static final int REQUEST_IMAGE = 960;
     @Override
@@ -25,16 +26,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ZXingLibrary.initDisplayOpinion(this);
-        Qrcode = findViewById(R.id.imgv_qrcode);
-        ImgQrcode = findViewById(R.id.imgv_img_qrcode);
+        Qrcode = findViewById(R.id.btn_qrcode);
+        ImgQrcode = findViewById(R.id.btn_img_qrcode);
+        CreateQrcode = findViewById(R.id.btn_create_qrcode);
         Qrcode.setOnClickListener(this);
         ImgQrcode.setOnClickListener(this);
+        CreateQrcode.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.imgv_qrcode:
+            case R.id.btn_qrcode:
                 // 先判断是否有权限。
                 if(AndPermission.hasPermission(this, Manifest.permission.CAMERA)) {
                     Intent intent = new Intent(MainActivity.this, QrcodeActivity.class);
@@ -47,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             .send();
                 }
                 break;
-            case R.id.imgv_img_qrcode:
+            case R.id.btn_img_qrcode:
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("image/*");
@@ -56,6 +59,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     Toast.makeText(this, "打开相册失败", Toast.LENGTH_LONG).show();
                 }
+                break;
+            case R.id.btn_create_qrcode:
+                Intent intent1 = new Intent(this,CreateQrcodeActivity.class);
+                startActivity(intent1);
                 break;
         }
     }

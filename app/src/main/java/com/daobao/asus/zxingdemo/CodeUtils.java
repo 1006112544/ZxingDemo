@@ -53,11 +53,11 @@ public class CodeUtils {
              * 首先判断图片的大小,若图片过大,则执行图片的裁剪操作,防止OOM
              */
             Bitmap mBitmap = bitmap;
-            while(bitmap.getByteCount()>=1920*1080){
+            while(mBitmap.getByteCount()>=1920*1080){
                 Matrix matrix = new Matrix();
                 matrix.setScale(0.5f, 0.5f);
-                mBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                        bitmap.getHeight(), matrix, true);
+                mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, mBitmap.getWidth(),
+                        mBitmap.getHeight(), matrix, true);
             }
             MultiFormatReader multiFormatReader = new MultiFormatReader();
             // 解码的参数
