@@ -2,11 +2,14 @@ package com.daobao.asus.zxingdemo;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -24,6 +27,8 @@ import com.uuzuche.lib_zxing.camera.BitmapLuminanceSource;
 import com.uuzuche.lib_zxing.camera.CameraManager;
 import com.uuzuche.lib_zxing.decoding.DecodeFormatManager;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 import java.util.Objects;
 import java.util.Vector;
@@ -42,47 +47,56 @@ public class CodeUtils {
      * 解析二维码图片工具类
      * @param analyzeCallback
      */
-    public static void analyzeBitmap(Bitmap mBitmap, AnalyzeCallback analyzeCallback) {
-
-        /**
-         * 首先判断图片的大小,若图片过大,则执行图片的裁剪操作,防止OOM
-         */
-        MultiFormatReader multiFormatReader = new MultiFormatReader();
-
-        // 解码的参数
-        Hashtable<DecodeHintType, Object> hints = new Hashtable<DecodeHintType, Object>(2);
-        // 可以解析的编码类型
-        Vector<BarcodeFormat> decodeFormats = new Vector<BarcodeFormat>();
-        if (decodeFormats == null || decodeFormats.isEmpty()) {
-            decodeFormats = new Vector<BarcodeFormat>();
-
-            // 这里设置可扫描的类型，我这里选择了都支持
-            decodeFormats.addAll(DecodeFormatManager.ONE_D_FORMATS);
-            decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);
-            decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
-        }
-        hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
-        // 设置继续的字符编码格式为UTF8
-        // hints.put(DecodeHintType.CHARACTER_SET, "UTF8");
-        // 设置解析配置参数
-        multiFormatReader.setHints(hints);
-
-        // 开始对图像资源解码
-        Result rawResult = null;
-        try {
-            rawResult = multiFormatReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(new BitmapLuminanceSource(mBitmap))));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (rawResult != null) {
-            if (analyzeCallback != null) {
-                analyzeCallback.onAnalyzeSuccess(mBitmap, rawResult.getText());
+    public static void analyzeBitmap(Bitmap bitmap, AnalyzeCallback analyzeCallback) {
+        try{
+            /**
+             * 首先判断图片的大小,若图片过大,则执行图片的裁剪操作,防止OOM
+             */
+            Bitmap mBitmap = bitmap;
+            while(bitmap.getByteCount()>=1920*1080){
+                Matrix matrix = new Matrix();
+                matrix.setScale(0.5f, 0.5f);
+                mBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                        bitmap.getHeight(), matrix, true);
             }
-        } else {
-            if (analyzeCallback != null) {
-                analyzeCallback.onAnalyzeFailed();
+            MultiFormatReader multiFormatReader = new MultiFormatReader();
+            // 解码的参数
+            Hashtable<DecodeHintType, Object> hints = new Hashtable<DecodeHintType, Object>(2);
+            // 可以解析的编码类型
+            Vector<BarcodeFormat> decodeFormats = new Vector<BarcodeFormat>();
+            if (decodeFormats == null || decodeFormats.isEmpty()) {
+                decodeFormats = new Vector<BarcodeFormat>();
+
+                // 这里设置可扫描的类型，我这里选择了都支持
+                decodeFormats.addAll(DecodeFormatManager.ONE_D_FORMATS);
+                decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);
+                decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
             }
+            hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
+            // 设置继续的字符编码格式为UTF8
+            // hints.put(DecodeHintType.CHARACTER_SET, "UTF8");
+            // 设置解析配置参数
+            multiFormatReader.setHints(hints);
+
+            // 开始对图像资源解码
+            Result rawResult = null;
+            try {
+                rawResult = multiFormatReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(new BitmapLuminanceSource(mBitmap))));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (rawResult != null) {
+                if (analyzeCallback != null) {
+                    analyzeCallback.onAnalyzeSuccess(mBitmap, rawResult.getText());
+                }
+            } else {
+                if (analyzeCallback != null) {
+                    analyzeCallback.onAnalyzeFailed();
+                }
+            }
+        }catch (OutOfMemoryError error){
+            Log.e("CodeUtils",error.getMessage());
         }
     }
 
