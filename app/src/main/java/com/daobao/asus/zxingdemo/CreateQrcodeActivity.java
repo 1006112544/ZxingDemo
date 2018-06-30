@@ -50,6 +50,22 @@ public class CreateQrcodeActivity extends AppCompatActivity{
                 mBitmap = CodeUtils.createImage(textContent2, 400, 400, null);
                 mImageView.setImageBitmap(mBitmap);
                 break;
+            case R.id.create_btn3:
+                String textContent3 = mEditText.getText().toString();
+                if (TextUtils.isEmpty(textContent3)) {
+                    Toast.makeText(this, "您的输入为空!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                try {
+                    Integer.valueOf(textContent3);
+                }catch (Exception e){
+                    Toast.makeText(this,"条形码只能是数字",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                mEditText.setText("");
+                mBitmap = BarCodeUtils.creatBarcode(textContent3,300,50);
+                mImageView.setImageBitmap(mBitmap);
+                break;
         }
     }
 
